@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { create } from 'domain';
 
 /**
  * User Schema
@@ -69,8 +70,18 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
-    User.generateVerifyToken = function generateVerifyToken(userInfo) {
+    User.generateVerifyToken = function generateVerifyToken(email, created_at) {
+        email = /^\w+([\.-]?\w+)*@/.test(email).split("@")[0]; // get email name before @
+        userInfo = created_at.toString().concat(email);
+
         return crypto.createHash('md5').update(userInfo).digest('hex');
+    };
+
+    User.generatePassword = function generatePassword(password, email) {
+        email = /^\w+([\.-]?\w+)*@/.test(email).split("@")[0]; // get email name before @
+        userInfo = password.concat(email);
+
+        return crypto.createHash('md5').update(userInfo).digest('hex');  
     };
 
     return User;
