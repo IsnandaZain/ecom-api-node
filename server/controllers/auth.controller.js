@@ -2,7 +2,7 @@ import moment from 'moment';
 
 import HttpStatus from 'http-status-codes';
 import db from '../../config/sequelize_master';
-import paramValidation from '../validator/auth.validation';
+import cron from '../scheduler/cron';
 
 const User = db.User;
 const UserTokens = db.UserTokens;
@@ -19,64 +19,95 @@ function register(req, res, next) {
             if (user) {
                 const response = {
                     "status": HttpStatus.BAD_REQUEST,
-                    "message": "email sudah digunakan"
+                    "messages": "email sudah digunakan",
                 }
 
                 return res.json(response);
             } else {
-                // generate hash password
-                User.generatePassword(req.body.password, req.body.email)
-                    .then( (hash_password) => {
-                        // create user
-                        User.create({
-                            fullname: req.body.fullname,
-                            email: req.body.email,
-                            password: hash_password,
-                        }).then( (user_saved) => {
-                            // create verify token
-                            user_saved.update({
-                                verify_token: User.generateVerifyToken(user_saved.email, user_saved.created_at)
-                            })
-
-                            // create token for user
-                            const usertoken_info = {
-                                id: user_saved.id,
-                                email: user_saved.email,
-                                created_at: moment(user_saved.created_at).unix(),
-                            }
-
-                            UserTokens.create({
-                                user_id: user_saved.id,
-                                token: UserTokens.generateToken(usertoken_info),
-                            }).then( (usertokens_saved) => {
-                                const response = {
-                                    "status": HttpStatus.OK,
-                                    "result": {
-                                        "id": user_saved.id,
-                                        "fullname": user_saved.fullname,
-                                        "email": user_saved.email,
-                                        "password": user_saved.password,
-                                        "token": usertokens_saved.token,
-                                        "verify_token": user_saved.verify_token,
-                                        "is_suspended": user_saved.suspended,
-                                        "avaatar": user_saved.avatar + "." + user_saved.avatar_ext
-                                    }
-                                }
-
-                                return res.json(response);
-                            })
-                        })
+                let generatedPassword = User.generatePassword(req.body.password, req.body.email);
+                User.create({
+                    fullname: req.body.fullname,
+                    email: req.body.email,
+                    password: generatedPassword,
+                }).then( (user_saved) => {
+                    // create verify token
+                    let user_createdat_timestamp = moment(user_saved.created_at).unix();
+                    user_saved.update({
+                        verify_token: User.generateVerifyToken(user_saved.email, user_createdat_timestamp)
                     })
-                let create_user = User.create({
 
+                    // send email verification
+                    cron.sendEmailVerification(user_saved.email);
+
+                    // create token for user
+                    const usertoken_info = {
+                        id: user_saved.id,
+                        email: user_saved.email,
+                        created_at: user_createdat_timestamp
+                    }
+
+                    UserTokens.create({
+                        user_id: user_saved.id,
+                        token: UserTokens.generateToken(usertoken_info),
+                    }).then( (usertokens_saved) => {
+                        const response = {
+                            "status": HttpStatus.OK,
+                            "result": {
+                                "id": user_saved.id,
+                                "fullname": user_saved.fullname,
+                                "email": user_saved.email,
+                                "password": user_saved.password,
+                                "token": usertokens_saved.token,
+                                "verify_token": user_saved.verify_token,
+                                "is_suspended": user_saved.suspended,
+                                "avatar": user_saved.avatar + "." + user_saved.avatar_ext
+                            }
+                        }
+
+                        return res.json(response);
+                    })
                 })
             }
         }).catch( error => next(error));
 }
 
+function verify_token(req, res, next) {
+    User.getByVerifyToken(req.params.verify_token)
+        .then( (user) => {
+            if (!user) {
+                const response = {
+                    "status": HttpStatus.BAD_REQUEST,
+                    "messages": "token verifikasi tidak ditemukan"
+                }
+
+                return res.json(response)
+            } else {
+                if (user.is_verify === 1) {
+                    const response = {
+                        "status": HttpStatus.BAD_REQUEST,
+                        "messages": "email sudah pernah diverifikasi"
+                    }
+
+                    return res.json(response)
+                } else {
+                    user.update({
+                        is_verify: 1
+                    })
+    
+                    const response = {
+                        "status": HttpStatus.OK,
+                        "message": "email berhasil di verifikasi",
+                    }
+    
+                    return res.json(response);
+                }
+            }
+    }).catch(error => next(error));
+}
+
 function login(req, res, next) {
     User.findOne({
-        where: { username: 'isnandamz'}
+        where: { email: 'isnandamz'}
     }).then( (user) => {
         if (!user) {
             const response = {
@@ -92,4 +123,5 @@ function login(req, res, next) {
 export {
     register,
     login,
+    verify_token,
 };

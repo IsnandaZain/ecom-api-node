@@ -21,4 +21,10 @@ router.route('/register')
         }
     });
 
+router.route('/verify-email/:verify_token')
+    /** GET /api/v1/auth/verify-email/:verify_token - Verify Email new user */
+    .get( (req, res, next) => {
+         authCtrl.verify_token(req, res, next)
+    });
+
 export default router;

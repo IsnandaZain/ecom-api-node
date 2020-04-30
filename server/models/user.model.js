@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { create } from 'domain';
+import { Sequelize } from 'sequelize';
 
 /**
  * User Schema
@@ -46,9 +47,19 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER(1),
             defaultValue: 0,
         },
+        created_at: {
+            type: DataTypes.DATE,
+            defaultValue: Sequelize.NOW(),
+        },
+        updated_at: {
+            type: DataTypes.DATE,
+            defaultValue: Sequelize.NOW(),
+        }
     }, {
         tableName: 'users',
         timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
         underscored: true,
         freezeTableName: true,
     });
@@ -70,18 +81,31 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
+    User.getByVerifyToken = function getByVerifyToken(verify_token) {
+        return this.findOne({
+            where: {
+                verify_token,
+            }
+        });
+    };
+
     User.generateVerifyToken = function generateVerifyToken(email, created_at) {
-        email = /^\w+([\.-]?\w+)*@/.test(email).split("@")[0]; // get email name before @
-        userInfo = created_at.toString().concat(email);
+        let regex = /^\w+([\.-]?\w+)*@/;
+        let userInfo = created_at.toString().concat(email.match(regex)[0].split("@")[0]);
 
         return crypto.createHash('md5').update(userInfo).digest('hex');
     };
 
     User.generatePassword = function generatePassword(password, email) {
-        email = /^\w+([\.-]?\w+)*@/.test(email).split("@")[0]; // get email name before @
-        userInfo = password.concat(email);
+        let regex = /^\w+([\.-]?\w+)*@/;
+        let userInfo = password.concat(email.match(regex)[0].split("@")[0]);
 
         return crypto.createHash('md5').update(userInfo).digest('hex');  
+    };
+
+    // Instance Method
+    User.prototype.checkPassword = function checkPassword() {
+        return this.password;
     };
 
     return User;
