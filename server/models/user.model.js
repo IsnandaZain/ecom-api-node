@@ -104,8 +104,13 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     // Instance Method
-    User.prototype.checkPassword = function checkPassword() {
-        return this.password;
+    User.prototype.checkPassword = function checkPassword(password) {
+        let regex = /^\w+([\.-]?\w+)*@/;
+        let userInfo = password.concat(this.email.match(regex)[0].split("@")[0]);
+        console.log("userInfo : ", userInfo);
+
+        let input_password = crypto.createHash('md5').update(userInfo).digest('hex');
+        return this.password === input_password;
     };
 
     return User;

@@ -13,11 +13,27 @@ router.route('/register')
         if (error) {
             const response = {
                 "status": HttpStatus.BAD_REQUEST,
-                "message": error.details[0].message,
+                "messages": error.details[0].message,
             }
             return res.json(response)
         } else {
             authCtrl.register(req, res, next)
+        }
+    });
+
+
+router.route('/login')
+    /** POST /api/v1/auth/login - Login user */
+    .post( (req, res, next) => {
+        const error = paramValidation.login(req);
+        if (error) {
+            const response = {
+                "status": HttpStatus.BAD_REQUEST,
+                "messages": error.details[0].message,
+            }
+            return res.json(response)
+        } else {
+            authCtrl.login(req, res, next)
         }
     });
 

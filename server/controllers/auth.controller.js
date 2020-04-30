@@ -56,7 +56,6 @@ function register(req, res, next) {
                                 "id": user_saved.id,
                                 "fullname": user_saved.fullname,
                                 "email": user_saved.email,
-                                "password": user_saved.password,
                                 "token": usertokens_saved.token,
                                 "verify_token": user_saved.verify_token,
                                 "is_suspended": user_saved.suspended,
@@ -106,17 +105,44 @@ function verify_token(req, res, next) {
 }
 
 function login(req, res, next) {
-    User.findOne({
-        where: { email: 'isnandamz'}
-    }).then( (user) => {
+    User.getByEmail(req.body.email).then( (user) => {
         if (!user) {
             const response = {
-                "message": "User does not exist!",
-                "status": HttpStatus.NOT_FOUND,
+                "status": HttpStatus.BAD_REQUEST,
+                "messages": "user tidak ditemukan"
             }
-            return res.json(response);
+
+            return res.json(response)
+        } else {
+            Promise.all([
+                user.checkPassword(req.body.password),
+                UserTokens.findOne({where: {user_id: user.id}})
+            ])
+            .then( ([checkedPassword, generatedToken]) => {
+                if (!checkedPassword) {
+                    const response = {
+                        "status": HttpStatus.BAD_REQUEST,
+                        "messages": "password yang diinputkan salah"
+                    }
+
+                    return res.json(response)
+                } else {
+                    const response = {
+                        "status": HttpStatus.OK,
+                        "result": {
+                            "id": user.id,
+                            "fullname": user.fullname,
+                            "email": user.email,
+                            "token": generatedToken.token,
+                            "is_suspended": user.suspended,
+                            "avatar": user.avatar + "." + user.avatar_ext
+                        }
+                    }
+
+                    return res.json(response)
+                }
+            }).catch( error => next(error));
         }
-        return res.json(user.username);
     })
 }
 
