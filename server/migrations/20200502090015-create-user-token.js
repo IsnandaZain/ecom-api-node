@@ -9,13 +9,16 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       token: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(255),
+        allowNull: false,
       },
       user_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER(11),
+        allowNull: false,
       },
       is_deleted: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER(1),
+        defaultValue: 0,
       },
       created_at: {
         allowNull: false,

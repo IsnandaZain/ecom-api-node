@@ -1,13 +1,11 @@
 import nodemailer from 'nodemailer';
-import moment from 'moment';
 
 import db from '../../config/sequelize_master';
 
 const User = db.User;
+const VerifyEmailToken = db.VerifyEmailToken;
 
-const sendEmailVerification = async(email) => {
-    console.log("auth email : ", process.env.AUTH_EMAIL_USER);
-    console.log("auth password : ", process.env.AUTH_EMAIL_PASSWORD);
+const sendEmailVerification = async(user_id) => {
     let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         secure: false,
@@ -21,12 +19,19 @@ const sendEmailVerification = async(email) => {
     
 
     // get user
-    User.getByEmail(email).then( (user) => {
+    User.findOne({
+        where: {
+            id: user_id
+        }, include: [{
+            model: VerifyEmailToken,
+            as: 'verify_email'
+        }]
+    }).then( (user) => {
         let mailOptions = {
             from: process.env.AUTH_EMAIL_USER,
-            to: email,
+            to: user.email,
             subject: 'Account Verification',
-            text: 'to verify your account please click this link : http://127.0.0.1/api/v1/auth/verify-token/' + user.verify_token,
+            text: 'to verify your account please click this link : http://127.0.0.1/api/v1/auth/verify-email/' + user.verify_email.url,
         };
 
         transporter.sendMail(mailOptions, function(error, info){
@@ -36,7 +41,7 @@ const sendEmailVerification = async(email) => {
                 console.log('Email sent : ' + info.response);
             }
         });
-    }).catch( error => next(error));
+    }).catch( error => console.log(error));
         
 };
 

@@ -9,13 +9,16 @@ import { Sequelize } from 'sequelize';
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define('User', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.INTEGER(11),
             autoIncrement: true,
             primaryKey: true,
         },
+        username: {
+            type: DataTypes.STRING(45),
+            allowNull: false,
+        },
         fullname: {
             type: DataTypes.STRING(45),
-            unique: true,
             allowNull: false,
         },
         email: {
@@ -26,12 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         password: {
             type: DataTypes.STRING(45),
         },
-        is_verify: {
-            type: DataTypes.INTEGER(1),
-            defaultValue: 0,
-        },
-        verify_token: {
-            type: DataTypes.STRING(150),
+        roles: {
+            type: DataTypes.STRING(15),
+            allowNull: false,
+            defaultValue: 'user',
         },
         is_deleted: {
             type: DataTypes.INTEGER(1),
@@ -68,6 +69,11 @@ module.exports = (sequelize, DataTypes) => {
         User.hasMany(models.UserTokens, {
             as: 'usertokens',
             foreignKey: 'id',
+        });  
+
+        User.hasMany(models.VerifyEmailToken, {
+            as: 'verify_email',
+            foreignKey: 'id',
         });
     };
 
@@ -76,32 +82,28 @@ module.exports = (sequelize, DataTypes) => {
 
         return this.findOne({
             where: {
-                email
+                email: email,
+                is_deleted: 0,
             },
         });
     };
 
-    User.getByVerifyToken = function getByVerifyToken(verify_token) {
-        return this.findOne({
-            where: {
-                verify_token,
-            }
-        });
+    User.generatePassword = function generatePassword(password, salt) {
+        password += salt
+
+        return crypto.createHash('md5').update(password).digest('hex');  
     };
 
-    User.generateVerifyToken = function generateVerifyToken(email, created_at) {
-        let regex = /^\w+([\.-]?\w+)*@/;
-        let userInfo = created_at.toString().concat(email.match(regex)[0].split("@")[0]);
+    User.generateSalt = function generateSalt() {
+        let result           = '';
+        let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for ( let i = 0; i < 5; i++ ) {
+           result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
 
-        return crypto.createHash('md5').update(userInfo).digest('hex');
-    };
-
-    User.generatePassword = function generatePassword(password, email) {
-        let regex = /^\w+([\.-]?\w+)*@/;
-        let userInfo = password.concat(email.match(regex)[0].split("@")[0]);
-
-        return crypto.createHash('md5').update(userInfo).digest('hex');  
-    };
+        return result;
+    }
 
     // Instance Method
     User.prototype.checkPassword = function checkPassword(password) {

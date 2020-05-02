@@ -13,11 +13,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         user_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.INTEGER(11),
             allowNull: false,
         },
         is_deleted: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.INTEGER(1),
             defaultValue: 1,
         }
       }, {
