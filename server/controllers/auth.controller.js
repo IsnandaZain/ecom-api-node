@@ -36,7 +36,8 @@ function register(req, res, next) {
                     let verify_email_salt = VerifyEmailToken.generateSalt();
 
                     user_saved.update({
-                        password: User.generatePassword(req.body.password, user_salt)
+                        password: User.generatePassword(req.body.password, user_salt),
+                        salt: user_salt,
                     })
 
                     // send email verification
@@ -46,7 +47,8 @@ function register(req, res, next) {
                     VerifyEmailToken.create({
                         user_id: user_saved.id,
                         token: VerifyEmailToken.generateToken(),
-                        url: VerifyEmailToken.generateUrl(user_saved.id, verify_email_salt)
+                        url: VerifyEmailToken.generateUrl(user_saved.id, verify_email_salt),
+                        salt: verify_email_salt,
                     })
 
                     // create user_tokens
@@ -78,13 +80,14 @@ function register(req, res, next) {
 }
 
 function verify_email(req, res, next) {
-    console.log(req.params.verify_url);
-    console.log(req.body.token);
     VerifyEmailToken.findOne({
         where: Sequelize.and(
             {url:req.params.verify_url},
             {token:req.body.token}
-        )
+        ), include: [{
+            model: User,
+            as: 'user'
+        }]
     })
         .then( (token) => {
             if (!token) {
@@ -119,43 +122,69 @@ function verify_email(req, res, next) {
 }
 
 function login(req, res, next) {
-    User.getByEmail(req.body.email).then( (user) => {
+    User.findOne({
+        where: Sequelize.and(
+            {is_deleted: 0},
+            Sequelize.or(
+                {email:req.body.username},
+                {username:req.body.username}
+            )
+        ), include: [{
+            model: VerifyEmailToken,
+            as: 'verify_email',
+            order: [
+                ['id', 'desc']
+            ]
+        }]
+    })
+    .then( (user) => {
         if (!user) {
             const response = {
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": "user tidak ditemukan"
             }
 
-            return res.json(response)
+            return res.json(response);
         } else {
-            Promise.all([
-                user.checkPassword(req.body.password),
-                UserTokens.findOne({where: {user_id: user.id}})
-            ])
-            .then( ([checkedPassword, generatedToken]) => {
-                if (!checkedPassword) {
-                    const response = {
-                        "status": HttpStatus.BAD_REQUEST,
-                        "messages": "password yang diinputkan salah"
-                    }
-
-                    return res.json(response)
-                } else {
-                    const response = {
-                        "status": HttpStatus.OK,
-                        "result": {
-                            "id": user.id,
-                            "fullname": user.fullname,
-                            "email": user.email,
-                            "token": generatedToken.token,
-                            "is_suspended": user.suspended,
-                            "avatar": user.avatar + "." + user.avatar_ext
-                        }
-                    }
-
-                    return res.json(response)
+            if (user.verify_email[0].is_verify === 0) {
+                const response = {
+                    "status": HttpStatus.BAD_REQUEST,
+                    "messages": "email akun belum diverifikasi"
                 }
-            }).catch( error => next(error));
+
+                return res.json(response);
+            } else {
+                Promise.all([
+                    user.checkPassword(req.body.password),
+                    UserTokens.findOne({
+                        where: {user_id: user.id}, 
+                        order: [
+                            ['id','desc'] 
+                    ]})
+                ]).then( ([checkedPassword, generatedToken]) => {
+                    if (!checkedPassword) {
+                        const response = {
+                            "status": HttpStatus.UNAUTHORIZED,
+                            "messages": "password yang diinputkan salah"
+                        }
+    
+                        return res.json(response);
+                    } else {
+                        const response = {
+                            "status": HttpStatus.OK,
+                            "result": {
+                                "id": user.id,
+                                "fullname": user.fullname,
+                                "email": user.email,
+                                "token": generatedToken.token,
+                                "is_suspended": user.is_suspended,
+                            }
+                        }
+    
+                        return res.json(response);
+                    }
+                }).catch(error => next(error));
+            }
         }
     })
 }

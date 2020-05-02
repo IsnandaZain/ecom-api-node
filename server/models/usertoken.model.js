@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         // associations can be defined here
         UserTokens.belongsTo(models.User, {
             as: 'user',
-            foreignKey: 'user_id',
+            foreignKey: 'id',
             constraints: false,
         })
     };

@@ -38,6 +38,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER(1),
             defaultValue: 0,
         },
+        salt: {
+            type: DataTypes.STRING(5),
+        },
         avatar: {
             type: DataTypes.STRING(50),
         },
@@ -68,12 +71,12 @@ module.exports = (sequelize, DataTypes) => {
     User.associate = (models) => {
         User.hasMany(models.UserTokens, {
             as: 'usertokens',
-            foreignKey: 'id',
+            foreignKey: 'user_id',
         });  
 
         User.hasMany(models.VerifyEmailToken, {
             as: 'verify_email',
-            foreignKey: 'id',
+            foreignKey: 'user_id',
         });
     };
 
@@ -89,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     User.generatePassword = function generatePassword(password, salt) {
-        password += salt
+        password += salt;
 
         return crypto.createHash('md5').update(password).digest('hex');  
     };
@@ -107,11 +110,9 @@ module.exports = (sequelize, DataTypes) => {
 
     // Instance Method
     User.prototype.checkPassword = function checkPassword(password) {
-        let regex = /^\w+([\.-]?\w+)*@/;
-        let userInfo = password.concat(this.email.match(regex)[0].split("@")[0]);
-        console.log("userInfo : ", userInfo);
+        password += this.salt;
 
-        let input_password = crypto.createHash('md5').update(userInfo).digest('hex');
+        let input_password = crypto.createHash('md5').update(password).digest('hex');
         return this.password === input_password;
     };
 

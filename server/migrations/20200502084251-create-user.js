@@ -33,6 +33,9 @@ module.exports = {
         type: Sequelize.INTEGER(1),
         defaultValue: 0,
       },
+      salt: {
+        type: Sequelize.STRING(5)
+      },
       is_suspended: {
         type: Sequelize.INTEGER(1),
         defaultValue: 0,

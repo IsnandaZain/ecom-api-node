@@ -2,10 +2,9 @@ import Joi from '@hapi/joi';
 
 function login (req) {
     const schema = Joi.object({
-        email: Joi.string().email()
+        username: Joi.string()
             .required()
             .messages({
-                'string.email': "format email salah",
                 'string.empty': "email masih kosong",
             }),
         password: Joi.string().min(8).max(16)

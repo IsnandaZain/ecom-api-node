@@ -24,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER(4),
         allowNull: false,
     },
+    salt: {
+        type: DataTypes.STRING(5),
+    },
     is_verify: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
@@ -56,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
       // associations can be defined here
       VerifyEmailToken.belongsTo(models.User, {
           as: 'user',
-          foreignKey: 'user_id',
+          foreignKey: 'id',
           constraints: false,
       });
   };

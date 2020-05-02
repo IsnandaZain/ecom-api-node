@@ -20,6 +20,9 @@ module.exports = {
         type: Sequelize.INTEGER(4),
         allowNull: false,
       },
+      salt: {
+        type: Sequelize.STRING(5),
+      },
       is_verify: {
         type: Sequelize.INTEGER(1),
         allowNull: false,
