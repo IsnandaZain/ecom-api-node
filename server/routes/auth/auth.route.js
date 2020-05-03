@@ -9,6 +9,10 @@ const router = express.Router();
 router.route('/register')
     /** POST /api/v1/auth/register - Create new user */
     .post( (req, res, next) => {
+        if (!req.body.roles) {
+            req.body.roles = 'user'
+        }
+        
         const error = paramValidation.register(req);
         if (error) {
             const response = {

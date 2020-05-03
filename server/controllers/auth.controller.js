@@ -16,6 +16,7 @@ const VerifyEmailToken = db.VerifyEmailToken;
  * @returns {*}
  */
 function register(req, res, next) {
+    console.log(req.body.roles);
     User.getByEmail(req.body.email)
         .then( (user) => {
             if (user) {
@@ -30,6 +31,7 @@ function register(req, res, next) {
                     username: req.body.fullname.toLowerCase().split(" ").slice(0,2).join('.'),
                     fullname: req.body.fullname,
                     email: req.body.email,
+                    roles: req.body.roles,
                     password: req.body.password,
                 }).then( (user_saved) => {
                     let user_salt = User.generateSalt();

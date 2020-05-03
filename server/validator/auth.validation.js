@@ -43,6 +43,11 @@ function register (req) {
                 'string.base': 'format fullname salah',
                 'string.empty': 'fullname masih kosong',
             }),
+        roles: Joi.string().valid('user', 'administrator')
+            .required()
+            .messages({
+                'string.base': 'role user tidak diketahui',
+            }),
         email: Joi.string().email()
             .required()
             .messages({
