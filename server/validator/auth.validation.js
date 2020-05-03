@@ -35,7 +35,7 @@ function logout (req) {
     return error;
 }
 
-function lost_password (req) {
+function forgot_password (req) {
     const schema = Joi.object({
         email: Joi.string().email()
             .required()
@@ -43,6 +43,23 @@ function lost_password (req) {
                 'string.email': "format email salah",
                 'string.empty': "email masih kosong",
             }),
+    });
+
+    const {error} = schema.validate(req.body);
+    return error
+}
+
+function change_password_forgot (req) {
+    const schema = Joi.object({
+        password: Joi.string().min(8).max(16)
+            .required()
+            .messages({
+                'string.base': "format password salah",
+                'string.empty': "password masih kosong",
+                'string.min': "password harus memiliki minimal 8 karakter",
+                'string.max': "password maksimal 16 karakter",
+            }),
+        confirm_password: Joi.string().min(8).max(16).required(),
     });
 
     const {error} = schema.validate(req.body);
@@ -86,6 +103,7 @@ function register (req) {
 export default {
     register,
     login,
-    lost_password,
+    forgot_password,
     logout,
+    change_password_forgot,
 };

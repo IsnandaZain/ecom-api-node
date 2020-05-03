@@ -64,21 +64,40 @@ router.route('/verify-email/:verify_url')
          authCtrl.verify_email(req, res, next)
     });
 
-/** 
-router.route('/lost-password/')
-    
+
+router.route('/forgot-password/')
+    /** POST /api/v1/auth/forgot-password - Request Change Password via Forgot Password */
     .post( (req, res, next) => {
-        authCtrl.lost_password(req, res, next)
+        const error = paramValidation.forgot_password(req);
+        if (error) {
+            const response = {
+                "status": HttpStatus.BAD_REQUEST,
+                "messages": error.details[0].message,
+            }
+            return res.json(response)
+        } else {
+            authCtrl.forgot_password(req, res, next)
+        }
     });
 
 
-router.route('/lost-password/change-password')
-    
+router.route('/forgot-password/:forgot_url')
+    /** POST /api/v1/auth/forgot-password/:forgot_url - Change Password */
     .post( (req, res, next) => {
-        authCtrl.lost_password_change(req, res, next)
+        const error = paramValidation.change_password_forgot(req);
+        if (error) {
+            const response = {
+                "status": HttpStatus.BAD_REQUEST,
+                "messages": error.details[0].message,
+            }
+            return res.json(response)
+        } else {
+            authCtrl.change_password_forgot(req, res, next)
+        }
     });
 
 
+/**
 router.route('/change-password')
     
     .post( (req, res, next) => {

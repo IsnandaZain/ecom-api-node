@@ -8,6 +8,7 @@ import cron from '../schedulers/cron';
 const User = db.User;
 const UserTokens = db.UserTokens;
 const VerifyEmailToken = db.VerifyEmailToken;
+const ForgotPassword = db.ForgotPassword;
 
 /**
  * Register a new user
@@ -198,28 +199,107 @@ function logout(req, res, next) {
             as: 'user',
         }],
     }).then( (token) => {
-        // set token to deleted
-        token.update({
-            is_deleted: 1,
-        })
-
-        const response = {
-            "status": HttpStatus.OK,
-            "result": {
-                "id": token.user.id,
-                "username": token.user.username,
-                "fullname": token.user.fullname,
-                "token": token.token,
+        if (token.is_deleted === 1) {
+            const response = {
+                "status": HttpStatus.BAD_REQUEST,
+                "messages": "Token tidak berlaku"
             }
-        }
 
-        return res.json(response);
+            return res.json(response);
+        } else {
+            // set token to deleted
+            token.update({
+                is_deleted: 1,
+            })
+
+            const response = {
+                "status": HttpStatus.OK,
+                "result": {
+                    "id": token.user.id,
+                    "username": token.user.username,
+                    "fullname": token.user.fullname,
+                    "token": token.token,
+                }
+            }
+
+            return res.json(response);
+            }
     }).catch(error => next(error));
+}
+
+function forgot_password(req, res, next) {
+    User.findOne({
+        where: {
+            email: req.body.email,
+        }
+    }).then( (user) => {
+        // generate Salt
+        const forgot_salt = ForgotPassword.generateSalt();
+        ForgotPassword.create({
+            user_id: user.id,
+            salt: forgot_salt,
+            url: ForgotPassword.generateUrl(user.email, forgot_salt)
+        }).then( (forgotpassword) => {
+            const response = {
+                "status": HttpStatus.OK,
+                "message": "email untuk proses perubahan password berhasil dikirim",
+            }
+
+            return res.json(response);
+        })
+    }).catch(error => next(error));
+}
+
+function change_password_forgot(req, res, next) {
+    ForgotPassword.findOne({
+        where: {
+            url: req.params.forgot_url
+        }
+    }).then( (forgotpassword) => {
+        if (!forgotpassword) {
+            const response = {
+                "status": HttpStatus.NOT_FOUND,
+                "messages": "url request tidak ditemukan"
+            }
+
+            return res.json(response);
+        } else {
+            // get user data
+            User.findOne({
+                where: {
+                    id: forgotpassword.user_id
+                }
+            }).then( (user) => {
+                if (!user) {
+                    const response = {
+                        "status": HttpStatus.NOT_FOUND,
+                        "messages": "user tidak ditemukan"
+                    }
+        
+                    return res.json(response);
+                } else {
+                    const user_salt = User.generateSalt();
+                    
+                    user.update({
+                        password: User.generatePassword(req.body.password, user_salt)
+                    })
+
+                    const response = {
+                        "status": HttpStatus.OK,
+                        "messages": "password berhasil di update",
+                    }
+                    return res.json(response);
+                }
+            })
+        }
+    }).catch( error => next(error));
 }
 
 export {
     register,
     login,
     verify_email,
-    logout
+    logout,
+    forgot_password,
+    change_password_forgot,
 };
