@@ -12,7 +12,7 @@ router.route('/register')
         if (!req.body.roles) {
             req.body.roles = 'user'
         }
-        
+
         const error = paramValidation.register(req);
         if (error) {
             const response = {
@@ -38,6 +38,22 @@ router.route('/login')
             return res.json(response)
         } else {
             authCtrl.login(req, res, next)
+        }
+    });
+
+
+router.route('/logout')
+    /** POST /api/v1/auth/logout - Logout user */
+    .post( (req, res, next) => {
+        const error = paramValidation.logout(req);
+        if (error) {
+            const response = {
+                "status": HttpStatus.BAD_REQUEST,
+                "messages": error.details[0].message,
+            }
+            return res.json(response)
+        } else {
+            authCtrl.logout(req, res, next)
         }
     });
 

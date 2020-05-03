@@ -2,10 +2,10 @@ import Joi from '@hapi/joi';
 
 function login (req) {
     const schema = Joi.object({
-        username: Joi.string()
+        identifier: Joi.string()
             .required()
             .messages({
-                'string.empty': "email masih kosong",
+                'string.empty': "username / email masih kosong",
             }),
         password: Joi.string().min(8).max(16)
             .required()
@@ -19,6 +19,20 @@ function login (req) {
 
     const {error} = schema.validate(req.body);
     return error
+}
+
+function logout (req) {
+    const schema = Joi.object({
+        token: Joi.string()
+            .required()
+            .messages({
+                'string.base': 'format token salah',
+                'string.empty': 'token masih kosong'
+            })
+    });
+
+    const { error } = schema.validate(req.body);
+    return error;
 }
 
 function lost_password (req) {
@@ -73,4 +87,5 @@ export default {
     register,
     login,
     lost_password,
+    logout,
 };

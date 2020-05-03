@@ -117,8 +117,8 @@ function login(req, res, next) {
         where: Sequelize.and(
             {is_deleted: 0},
             Sequelize.or(
-                {email:req.body.username},
-                {username:req.body.username}
+                {email:req.body.identifier},
+                {username:req.body.identifier}
             )
         ), include: [{
             model: VerifyEmailToken,
@@ -188,8 +188,38 @@ function login(req, res, next) {
     })
 }
 
+function logout(req, res, next) {
+    UserTokens.findOne({
+        where: {
+            token: req.body.token
+        },
+        include: [{
+            model: User,
+            as: 'user',
+        }],
+    }).then( (token) => {
+        // set token to deleted
+        token.update({
+            is_deleted: 1,
+        })
+
+        const response = {
+            "status": HttpStatus.OK,
+            "result": {
+                "id": token.user.id,
+                "username": token.user.username,
+                "fullname": token.user.fullname,
+                "token": token.token,
+            }
+        }
+
+        return res.json(response);
+    }).catch(error => next(error));
+}
+
 export {
     register,
     login,
     verify_email,
+    logout
 };
