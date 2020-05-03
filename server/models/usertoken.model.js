@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         is_deleted: {
             type: DataTypes.INTEGER(1),
-            defaultValue: 1,
+            defaultValue: 0,
         }
       }, {
           tableName: 'user_tokens',

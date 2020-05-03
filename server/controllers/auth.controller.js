@@ -46,33 +46,23 @@ function register(req, res, next) {
                         token: VerifyEmailToken.generateToken(),
                         url: VerifyEmailToken.generateUrl(user_saved.id, verify_email_salt),
                         salt: verify_email_salt,
-                    })
-
-                    // create user_tokens
-                    const usertoken_info = {
-                        id: user_saved.id,
-                        email: user_saved.email,
-                        created_at: moment().unix(),
-                    };
-
-                    UserTokens.create({
-                        user_id: user_saved.id,
-                        token: UserTokens.generateToken(usertoken_info),
-                    }).then( (usertokens_saved) => {
+                    }).then( () => {
                         // send email verification
                         cron.sendEmailVerification(user_saved.id);
-                        const response = {
-                            "status": HttpStatus.OK,
-                            "result": {
-                                "id": user_saved.id,
-                                "username": user_saved.username,
-                                "fullname": user_saved.fullname,
-                                "token": usertokens_saved.token,
-                                "is_suspended": user_saved.is_suspended,
-                            }
-                        }
-                        return res.json(response);
                     })
+
+                    const response = {
+                        "status": HttpStatus.OK,
+                        "result": {
+                            "id": user_saved.id,
+                            "username": user_saved.username,
+                            "fullname": user_saved.fullname,
+                            "email": user_saved.email,
+                            "is_suspended": user_saved.is_suspended
+                        }
+                    }
+
+                    return res.json(response);
                 })
             }
         }).catch( error => next(error));   
@@ -153,13 +143,20 @@ function login(req, res, next) {
 
                 return res.json(response);
             } else {
+                const usertoken_info = {
+                    id: user.id,
+                    email: user.email,
+                    created_at: moment().unix(),
+                };
+
                 Promise.all([
                     user.checkPassword(req.body.password),
-                    UserTokens.findOne({
-                        where: {user_id: user.id}, 
-                        order: [
-                            ['id','desc'] 
-                    ]})
+
+                    // create token
+                    UserTokens.create({
+                        user_id: user.id,
+                        token: UserTokens.generateToken(usertoken_info)
+                    })
                 ]).then( ([checkedPassword, generatedToken]) => {
                     if (!checkedPassword) {
                         const response = {
@@ -173,6 +170,7 @@ function login(req, res, next) {
                             "status": HttpStatus.OK,
                             "result": {
                                 "id": user.id,
+                                "username": user.username,
                                 "fullname": user.fullname,
                                 "email": user.email,
                                 "token": generatedToken.token,
