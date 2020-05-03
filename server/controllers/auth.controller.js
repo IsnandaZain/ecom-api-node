@@ -39,9 +39,6 @@ function register(req, res, next) {
                         password: User.generatePassword(req.body.password, user_salt),
                         salt: user_salt,
                     })
-
-                    // send email verification
-                    // cron.sendEmailVerification(user_saved.id);
     
                     // create verify email
                     VerifyEmailToken.create({
@@ -62,6 +59,8 @@ function register(req, res, next) {
                         user_id: user_saved.id,
                         token: UserTokens.generateToken(usertoken_info),
                     }).then( (usertokens_saved) => {
+                        // send email verification
+                        cron.sendEmailVerification(user_saved.id);
                         const response = {
                             "status": HttpStatus.OK,
                             "result": {

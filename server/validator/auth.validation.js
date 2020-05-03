@@ -21,6 +21,20 @@ function login (req) {
     return error
 }
 
+function lost_password (req) {
+    const schema = Joi.object({
+        email: Joi.string().email()
+            .required()
+            .messages({
+                'string.email': "format email salah",
+                'string.empty': "email masih kosong",
+            }),
+    });
+
+    const {error} = schema.validate(req.body);
+    return error
+}
+
 function register (req) {
     const schema = Joi.object({
         fullname: Joi.string()
@@ -53,4 +67,5 @@ function register (req) {
 export default {
     register,
     login,
+    lost_password,
 };

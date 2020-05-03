@@ -37,10 +37,33 @@ router.route('/login')
         }
     });
 
+
 router.route('/verify-email/:verify_url')
-    /** GET /api/v1/auth/verify-email/:verify_token - Verify Email new user */
+    /** POST /api/v1/auth/verify-email/:verify_token - Verify Email new user */
     .post( (req, res, next) => {
          authCtrl.verify_email(req, res, next)
     });
+
+/** 
+router.route('/lost-password/')
+    
+    .post( (req, res, next) => {
+        authCtrl.lost_password(req, res, next)
+    });
+
+
+router.route('/lost-password/change-password')
+    
+    .post( (req, res, next) => {
+        authCtrl.lost_password_change(req, res, next)
+    });
+
+
+router.route('/change-password')
+    
+    .post( (req, res, next) => {
+        authCtrl.change_password(req, res, next)
+    });
+*/
 
 export default router;
