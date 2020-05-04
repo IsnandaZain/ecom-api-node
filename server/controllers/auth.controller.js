@@ -281,7 +281,8 @@ function change_password_forgot(req, res, next) {
                     const user_salt = User.generateSalt();
                     
                     user.update({
-                        password: User.generatePassword(req.body.password, user_salt)
+                        password: User.generatePassword(req.body.password, user_salt),
+                        salt: user_salt,
                     })
 
                     const response = {
