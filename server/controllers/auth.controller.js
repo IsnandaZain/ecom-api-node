@@ -84,7 +84,7 @@ function verify_email(req, res, next) {
         .then( (token) => {
             if (!token) {
                 const response = {
-                    "status": HttpStatus.BAD_REQUEST,
+                    "status": HttpStatus.NOT_FOUND,
                     "messages": "token verifikasi tidak ditemukan"
                 }
 
@@ -132,7 +132,7 @@ function login(req, res, next) {
     .then( (user) => {
         if (!user) {
             const response = {
-                "status": HttpStatus.BAD_REQUEST,
+                "status": HttpStatus.NOT_FOUND,
                 "messages": "user tidak ditemukan"
             }
 
