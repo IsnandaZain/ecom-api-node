@@ -296,6 +296,48 @@ function change_password_forgot(req, res, next) {
     }).catch( error => next(error));
 }
 
+function me(req, res, next) {
+    UserTokens.findOne({
+        where: {
+            token: req.body.token
+        },
+        include: [{
+            model: User,
+            as: 'user'
+        }]
+    }).then( (token) => {
+        if (!token) {
+            const response = {
+                "status": HttpStatus.NOT_FOUND,
+                "messages": "token sudah tidak aktif"
+            }
+
+            return res.json(response)
+        } else {
+            if (!token.user) {
+                const response = {
+                    "status": HttpStatus.NOT_FOUND,
+                    "messages": "data user tidak ditemukan"
+                }
+
+                return res.json(response)
+            } else {
+                const response = {
+                    "status": HttpStatus.OK,
+                    "result": {
+                        "id": token.user.id,
+                        "fullname": token.user.fullname,
+                        "username": token.user.username,
+                        "email": token.user.email,
+                        "token": token.token,
+                    }
+                }
+                return res.json(response);
+            }
+        }
+    }).catch( error => next(error));
+}
+
 export {
     register,
     login,
@@ -303,4 +345,5 @@ export {
     logout,
     forgot_password,
     change_password_forgot,
+    me,
 };

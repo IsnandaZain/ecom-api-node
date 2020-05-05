@@ -97,12 +97,10 @@ router.route('/forgot-password/:forgot_url')
     });
 
 
-/**
-router.route('/change-password')
-    
+router.route('/me')
+    /** GET /api/v1/auth/me - mendapatkan data user menggunakan token */
     .post( (req, res, next) => {
-        authCtrl.change_password(req, res, next)
+        authCtrl.me(req, res, next)
     });
-*/
 
 export default router;
