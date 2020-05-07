@@ -59,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
       // associations can be defined here
       VerifyEmailToken.belongsTo(models.User, {
           as: 'user',
-          foreignKey: 'id',
+          foreignKey: 'user_id',
           constraints: false,
       });
   };
