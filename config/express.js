@@ -1,8 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import routes from '../server/routes/index.route';
 import path from 'path';
 import fs from 'fs';
+
+import routes from '../server/routes/index.route';
+import * as auth from '../server/helpers/auth';
 
 const app = express();
 
@@ -36,9 +38,9 @@ app.use( function(req, res, next) {
     // hooks Before Request
     console.log("Request is start!");
 
-    const authorizationHeader = req.headers['Authorization'];
+    const authorizationHeader = req.headers.authorization;
     if (authorizationHeader) {
-        console.log("Token is found!");
+        auth.userInfo(authorizationHeader);
     } else {
         console.log("Token is not found!");
     }
