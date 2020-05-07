@@ -171,7 +171,7 @@ function login(req, res, next) {
                     } else {
                         const response = {
                             "status": HttpStatus.OK,
-                            "result": {
+                            "user": {
                                 "id": user.id,
                                 "username": user.username,
                                 "fullname": user.fullname,

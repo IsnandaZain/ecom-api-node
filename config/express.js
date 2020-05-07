@@ -1,7 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import routes from '../server/routes/index.route';
-import validator from 'express-validation';
+import path from 'path';
+import fs from 'fs';
 
 const app = express();
 
@@ -43,6 +44,30 @@ app.use( function(req, res, next) {
     }
     next();
 });
+
+// routes khusus file
+app.use('/files', function(req, res) {
+    console.log(req.path);
+    let url_path = req.path.split("/");
+    let filename = url_path[(url_path.length - 1)];
+    let filepath = '../public';
+    for (let i=1; i < (url_path.length - 1); i++) filepath += "/" + url_path[i];
+
+    filepath = path.join(__dirname, filepath, filename);
+    // make sure file is exists
+    fs.exists(filepath, function (data) {
+        if (!data) {
+            console.log(data);
+            return res.json({
+                "status": 404,
+                "messages": "file tidak ditemukan"
+            });
+        } else {
+            res.attachment(`${filename}`)
+            res.sendFile(filepath);
+        }
+    })
+})
 
 // mount all routes on /api/v1 path
 app.use('/api/v1', routes);
