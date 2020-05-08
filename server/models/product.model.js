@@ -1,13 +1,15 @@
+import { Sequelize } from 'sequelize';
+
 'use strict';
 module.exports = (sequelize, DataTypes) => {
     const Product = sequelize.define('Product', {
         id: {
-          type: DataTypes.INTEGER,
-          autoIncrement: true,
-          primaryKey: true,
+            type: DataTypes.INTEGER(11),
+            autoIncrement: true,
+            primaryKey: true,
         },
         user_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.INTEGER(11),
             allowNull: false,
         },
         title: {
@@ -15,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         description: {
-            type: DataTypes.STRING(255),
+            type: DataTypes.STRING(500),
             allowNull: false,
         },
         price: {
@@ -26,26 +28,33 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             defaultValue: 1,
         },
+        is_deleted: {
+            type: DataTypes.INTEGER(1),
+            defaultValue: 0,
+        },
+        created_at: {
+            type: DataTypes.DATE,
+            defaultValue: Sequelize.NOW(),
+        },
+        updated_at: {
+            type: DataTypes.DATE,
+            defaultValue: Sequelize.NOW()
+        }
     }, {
         tableName: 'products',
         timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
         underscored: true,
         freezeTableName: true,
-        indexes: [
-            {
-                unique: true,
-                fields: ['title']
-            }
-        ]
     });
 
-    Product.associate = function(models) {
-      // associations can be defined here
-      Product.belongsTo(models.User, {
-          as: 'user',
-          foreignKey: 'user_id',
-          constraints: false,
-      });
+    Product.associate = (models) => {
+        Product.belongsTo(models.User, {
+            as: 'user',
+            foreignKey: 'user_id',
+            constraints: false,
+        })
     };
 
     return Product;

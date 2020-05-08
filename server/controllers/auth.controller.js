@@ -18,7 +18,6 @@ const ForgotPassword = db.ForgotPassword;
  * @returns {*}
  */
 function register(req, res, next) {
-    console.log(req.body.roles);
     User.getByEmail(req.body.email)
         .then( (user) => {
             if (user) {

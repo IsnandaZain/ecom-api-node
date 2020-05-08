@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
+import HttpStatus from 'http-status-codes';
 
 import routes from '../server/routes/index.route';
 import * as auth from '../server/helpers/auth';
@@ -13,16 +14,8 @@ require('dotenv').config();
 app.set('port', process.env.APP_PORT || 3000);
 app.set('host', process.env.APP_HOST || 'localhost');
 
-app.use(bodyParser.json({limit: '1024kb'}));
-app.use(bodyParser.urlencoded({limit: '1024kb', extended: true}));
-app.use(bodyParser.raw({
-    inflate: true,
-    limit: '100kb',
-    type: 'application/json'
-}));
-
 // hooks for before and after request
-app.use( function(req, res, next) {
+app.use( async function(req, res, next) {
     // hook After Request
     function afterResponse(){
         res.removeListener('finish', afterResponse);
@@ -40,12 +33,26 @@ app.use( function(req, res, next) {
 
     const authorizationHeader = req.headers.authorization;
     if (authorizationHeader) {
-        auth.userInfo(authorizationHeader);
+        const authData = await auth.userInfo(authorizationHeader);
+        if(!authData) {
+            return res.json({
+                "status": HttpStatus.UNAUTHORIZED,
+                "messages": "token tidak valid"
+            })
+        } 
     } else {
         console.log("Token is not found!");
     }
     next();
 });
+
+app.use(bodyParser.json({limit: '1024kb'}));
+app.use(bodyParser.urlencoded({limit: '1024kb', extended: true}));
+app.use(bodyParser.raw({
+    inflate: true,
+    limit: '100kb',
+    type: 'application/json'
+}));
 
 // routes khusus file
 app.use('/files', function(req, res) {
