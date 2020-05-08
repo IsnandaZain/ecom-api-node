@@ -25,7 +25,6 @@ function userInfo(token) {
             "email": user_token.user.email,
             "role": user_token.user.roles,
         }
-        console.log(dataUser);
     })
 }
 

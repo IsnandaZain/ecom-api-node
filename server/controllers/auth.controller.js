@@ -4,6 +4,7 @@ import {Sequelize} from 'sequelize';
 import HttpStatus from 'http-status-codes';
 import db from '../../config/sequelize_master';
 import cron from '../schedulers/cron';
+import * as APIError from '../helpers/APIError';
 
 const User = db.User;
 const UserTokens = db.UserTokens;
@@ -21,12 +22,7 @@ function register(req, res, next) {
     User.getByEmail(req.body.email)
         .then( (user) => {
             if (user) {
-                const response = {
-                    "status": HttpStatus.BAD_REQUEST,
-                    "messages": "email sudah digunakan",
-                }
-
-                return res.json(response);
+                return res.json(APIError.BadRequest("email sudah digunakan"));
             } else {
                 User.create({
                     username: req.body.fullname.toLowerCase().split(" ").slice(0,2).join('.'),
@@ -68,7 +64,10 @@ function register(req, res, next) {
                     return res.json(response);
                 })
             }
-        }).catch( error => next(error));   
+        }).catch( (error) => {
+            console.log(error);
+            return res.json(APIError.InternalServerError());
+        });   
 }
 
 function verify_email(req, res, next) {
@@ -83,20 +82,10 @@ function verify_email(req, res, next) {
     })
         .then( (token) => {
             if (!token) {
-                const response = {
-                    "status": HttpStatus.NOT_FOUND,
-                    "messages": "token verifikasi tidak ditemukan"
-                }
-
-                return res.json(response)
+                return res.json(APIError.NOT_FOUND("token verifikasi tidak ditemukan"));
             } else {
                 if (token.is_verify === 1) {
-                    const response = {
-                        "status": HttpStatus.BAD_REQUEST,
-                        "messages": "email sudah pernah diverifikasi"
-                    }
-
-                    return res.json(response)
+                    return res.json(APIError.BadRequest("email sudah pernah diverifikasi"));
                 } else {
                     token.update({
                         is_verify: 1
@@ -110,7 +99,10 @@ function verify_email(req, res, next) {
                     return res.json(response);
                 }
             }
-    }).catch(error => next(error));
+    }).catch( (error) => {
+        console.log(error);
+        return res.json(APIError.InternalServerError());
+    });
 }
 
 function login(req, res, next) {
@@ -131,20 +123,10 @@ function login(req, res, next) {
     })
     .then( (user) => {
         if (!user) {
-            const response = {
-                "status": HttpStatus.NOT_FOUND,
-                "messages": "user tidak ditemukan"
-            }
-
-            return res.json(response);
+            return res.json(APIError.NotFound("user tidak ditemukan"));
         } else {
             if (user.verify_email[0].is_verify === 0) {
-                const response = {
-                    "status": HttpStatus.BAD_REQUEST,
-                    "messages": "email akun belum diverifikasi"
-                }
-
-                return res.json(response);
+                return res.json(APIError.BadRequest("email akun belum diverifikasi"));
             } else {
                 const usertoken_info = {
                     id: user.id,
@@ -162,12 +144,7 @@ function login(req, res, next) {
                     })
                 ]).then( ([checkedPassword, generatedToken]) => {
                     if (!checkedPassword) {
-                        const response = {
-                            "status": HttpStatus.UNAUTHORIZED,
-                            "messages": "password yang diinputkan salah"
-                        }
-    
-                        return res.json(response);
+                        return res.json(APIError.Unauthorized("password yang diinputkan salah"));
                     } else {
                         const response = {
                             "status": HttpStatus.OK,
@@ -183,7 +160,10 @@ function login(req, res, next) {
     
                         return res.json(response);
                     }
-                }).catch(error => next(error));
+                }).catch( (error) => {
+                    console.log(error);
+                    return res.json(APIError.InternalServerError());
+                });
             }
         }
     })
@@ -200,12 +180,7 @@ function logout(req, res, next) {
         }],
     }).then( (token) => {
         if (token.is_deleted === 1) {
-            const response = {
-                "status": HttpStatus.BAD_REQUEST,
-                "messages": "Token tidak berlaku"
-            }
-
-            return res.json(response);
+            return res.json(APIError.BadRequest("token tidak berlaku"));
         } else {
             // set token to deleted
             token.update({
@@ -224,7 +199,10 @@ function logout(req, res, next) {
 
             return res.json(response);
             }
-    }).catch(error => next(error));
+    }).catch( (error) => {
+        console.log(error);
+        return res.json(APIError.InternalServerError());
+    });
 }
 
 function forgot_password(req, res, next) {
@@ -233,21 +211,28 @@ function forgot_password(req, res, next) {
             email: req.body.email,
         }
     }).then( (user) => {
-        // generate Salt
-        const forgot_salt = ForgotPassword.generateSalt();
-        ForgotPassword.create({
-            user_id: user.id,
-            salt: forgot_salt,
-            url: ForgotPassword.generateUrl(user.email, forgot_salt)
-        }).then( (forgotpassword) => {
-            const response = {
-                "status": HttpStatus.OK,
-                "message": "email untuk proses perubahan password berhasil dikirim",
-            }
+        if (!user) { 
+            return res.json(APIError.NotFound("user tidak ditemukan"));
+        } else { 
+                // generate Salt
+            const forgot_salt = ForgotPassword.generateSalt();
+            ForgotPassword.create({
+                user_id: user.id,
+                salt: forgot_salt,
+                url: ForgotPassword.generateUrl(user.email, forgot_salt)
+            }).then( (forgotpassword) => {
+                const response = {
+                    "status": HttpStatus.OK,
+                    "message": "email untuk proses perubahan password berhasil dikirim",
+                }
 
-            return res.json(response);
-        })
-    }).catch(error => next(error));
+                return res.json(response);
+            })
+        }
+    }).catch( (error) => {
+        console.log(error);
+        return res.json(APIError.InternalServerError());
+    });
 }
 
 function change_password_forgot(req, res, next) {
@@ -257,12 +242,7 @@ function change_password_forgot(req, res, next) {
         }
     }).then( (forgotpassword) => {
         if (!forgotpassword) {
-            const response = {
-                "status": HttpStatus.NOT_FOUND,
-                "messages": "url request tidak ditemukan"
-            }
-
-            return res.json(response);
+            return res.json(APIError.NotFound("url request tidak ditemukan"));
         } else {
             // get user data
             User.findOne({
@@ -271,12 +251,7 @@ function change_password_forgot(req, res, next) {
                 }
             }).then( (user) => {
                 if (!user) {
-                    const response = {
-                        "status": HttpStatus.NOT_FOUND,
-                        "messages": "user tidak ditemukan"
-                    }
-        
-                    return res.json(response);
+                    return res.json(APIError.NotFound("user tidak ditemukan"));
                 } else {
                     const user_salt = User.generateSalt();
                     
@@ -293,7 +268,10 @@ function change_password_forgot(req, res, next) {
                 }
             })
         }
-    }).catch( error => next(error));
+    }).catch( error => {
+        console.log(error);
+        return res.json(APIError.InternalServerError());
+    });
 }
 
 function me(req, res, next) {
@@ -307,20 +285,10 @@ function me(req, res, next) {
         }]
     }).then( (token) => {
         if (!token) {
-            const response = {
-                "status": HttpStatus.NOT_FOUND,
-                "messages": "token sudah tidak aktif"
-            }
-
-            return res.json(response)
+            return res.json(APIError.NotFound("token sudah tidak aktif"));
         } else {
             if (!token.user) {
-                const response = {
-                    "status": HttpStatus.NOT_FOUND,
-                    "messages": "data user tidak ditemukan"
-                }
-
-                return res.json(response)
+                return res.json(APIError.NotFound("user tidak ditemukan"));
             } else {
                 const response = {
                     "status": HttpStatus.OK,
@@ -335,7 +303,10 @@ function me(req, res, next) {
                 return res.json(response);
             }
         }
-    }).catch( error => next(error));
+    }).catch( error => {
+        console.log(error);
+        return res.json(APIError.InternalServerError());
+    });
 }
 
 export {
