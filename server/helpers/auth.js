@@ -1,3 +1,5 @@
+import HttpStatus from 'http-status-codes';
+
 import db from '../../config/sequelize_master';
 
 const User = db.User;
@@ -5,7 +7,7 @@ const UserTokens = db.UserTokens;
 
 const dataUser = {}
 
-async function userInfo(token) {
+async function userInfo(res, token) {
     await UserTokens.findOne({
         where: {
             token: token,
@@ -16,7 +18,10 @@ async function userInfo(token) {
         }],
     }).then( (user_token) => {
         if (!user_token) {
-            return null;
+            return res.status(HttpStatus.UNAUTHORIZED).json({
+                "status": HttpStatus.UNAUTHORIZED,
+                "messages": "token tidak valid"
+            });
         } else {
             dataUser['id'] = user_token.user.id;
             dataUser["username"] = user_token.user.username;

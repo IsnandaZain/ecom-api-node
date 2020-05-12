@@ -29,7 +29,13 @@ function create (req) {
             .messages({
                 "string.base": "stok harus berupa angka",
                 "string.empty": "stok masih kosong"
-            })
+            }),
+        size: Joi.string()
+            .optional(),
+        color: Joi.string()
+            .optional(),
+        material: Joi.string()
+            .optional(),
     });
 
     const {error} = schema.validate(req.body);

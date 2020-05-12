@@ -33,13 +33,7 @@ app.use( async function(req, res, next) {
 
     const authorizationHeader = req.headers.authorization;
     if (authorizationHeader) {
-        const authData = await auth.userInfo(authorizationHeader);
-        if(!authData) {
-            return res.json({
-                "status": HttpStatus.UNAUTHORIZED,
-                "messages": "token tidak valid"
-            })
-        } 
+        await auth.userInfo(res, authorizationHeader);
     } else {
         console.log("Token is not found!");
     }

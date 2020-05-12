@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 
+
 'use strict';
 module.exports = (sequelize, DataTypes) => {
     const Product = sequelize.define('Product', {
@@ -54,7 +55,22 @@ module.exports = (sequelize, DataTypes) => {
             as: 'user',
             foreignKey: 'user_id',
             constraints: false,
-        })
+        });
+
+        Product.hasMany(models.ProductSize, {
+            as: 'product_size',
+            foreignKey: 'product_id',
+        });
+
+        Product.hasMany(models.ProductColor, {
+            as: 'product_color',
+            foreignKey: 'product_id',
+        });
+
+        Product.hasMany(models.ProductMaterial, {
+            as: 'product_material',
+            foreignKey: 'product_id'
+        });
     };
 
     return Product;
