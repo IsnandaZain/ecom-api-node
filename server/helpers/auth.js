@@ -36,7 +36,17 @@ async function userInfo(res, token) {
 }
 
 
+function checkPermission(res, role) {
+    if (dataUser.role != role) {
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+            "status": HttpStatus.UNAUTHORIZED,
+            "messages": "You have not permission to do this action"
+        })
+    }
+}
+
 export {
     userInfo,
+    checkPermission,
     dataUser,
 };
