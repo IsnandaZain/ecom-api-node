@@ -50,7 +50,6 @@ app.use(bodyParser.raw({
 
 // routes khusus file
 app.use('/files', function(req, res) {
-    console.log(req.path);
     let url_path = req.path.split("/");
     let filename = url_path[(url_path.length - 1)];
     let filepath = '../public';
@@ -60,7 +59,6 @@ app.use('/files', function(req, res) {
     // make sure file is exists
     fs.exists(filepath, function (data) {
         if (!data) {
-            console.log(data);
             return res.json({
                 "status": 404,
                 "messages": "file tidak ditemukan"

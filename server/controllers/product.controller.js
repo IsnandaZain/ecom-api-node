@@ -19,7 +19,6 @@ const ProductMaterial = db.ProductMaterial;
  * @returns {*}
  */
 function create(req, res) {
-    console.log(authData.dataUser);
     Product.create({
         user_id: authData.dataUser.id,
         title: req.body.title,

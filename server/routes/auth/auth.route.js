@@ -19,7 +19,7 @@ router.route('/register')
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": error.details[0].message,
             }
-            return res.json(response)
+            return res.status(HttpStatus.BAD_REQUEST).json(response)
         } else {
             authCtrl.register(req, res, next)
         }
@@ -35,7 +35,7 @@ router.route('/login')
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": error.details[0].message,
             }
-            return res.json(response)
+            return res.status(HttpStatus.BAD_REQUEST).json(response)
         } else {
             authCtrl.login(req, res, next)
         }
@@ -51,7 +51,7 @@ router.route('/logout')
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": error.details[0].message,
             }
-            return res.json(response)
+            return res.status(HttpStatus.BAD_REQUEST).json(response)
         } else {
             authCtrl.logout(req, res, next)
         }
@@ -74,7 +74,7 @@ router.route('/forgot-password/')
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": error.details[0].message,
             }
-            return res.json(response)
+            return res.status(HttpStatus.BAD_REQUEST).json(response)
         } else {
             authCtrl.forgot_password(req, res, next)
         }
@@ -90,7 +90,7 @@ router.route('/forgot-password/:forgot_url')
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": error.details[0].message,
             }
-            return res.json(response)
+            return res.status(HttpStatus.BAD_REQUEST).json(response)
         } else {
             authCtrl.change_password_forgot(req, res, next)
         }

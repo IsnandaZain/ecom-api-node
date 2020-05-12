@@ -4,12 +4,13 @@ import multer from 'multer';
 
 import paramValidation from '../../validator/product.validation';
 import * as productCtrl from '../../controllers/product.controller';
+import upload from '../../../config/multer_upload';
 
 const router = express.Router();
 
 router.route('/create')
     /** POST /api/v1/dashboard/product/create - Create new product */
-    .post( (req, res) => {
+    .post( upload.single('product_photo'), (req, res) => {
         const error = paramValidation.create(req);
         if (error) {
             const response = {
