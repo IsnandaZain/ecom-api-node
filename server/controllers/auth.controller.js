@@ -21,7 +21,7 @@ function register(req, res, next) {
     User.getByEmail(req.body.email)
         .then( (user) => {
             if (user) {
-                return res.json(APIError.BadRequest("email sudah digunakan"));
+                return APIError.BadRequest(res, "email sudah digunakan");
             } else {
                 User.create({
                     username: req.body.fullname.toLowerCase().split(" ").slice(0,2).join('.'),
@@ -65,7 +65,7 @@ function register(req, res, next) {
             }
         }).catch( (error) => {
             console.log(error);
-            return res.json(APIError.InternalServerError());
+            return APIError.InternalServerError((res))
         });   
 }
 
@@ -81,10 +81,10 @@ function verify_email(req, res, next) {
     })
         .then( (token) => {
             if (!token) {
-                return res.json(APIError.NOT_FOUND("token verifikasi tidak ditemukan"));
+                return APIError.NotFound(res, "token verifikasi tidak ditemukan");
             } else {
                 if (token.is_verify === 1) {
-                    return res.json(APIError.BadRequest("email sudah pernah diverifikasi"));
+                    return APIError.BadRequest(res, "email sudah pernah diverifikasi");
                 } else {
                     token.update({
                         is_verify: 1
@@ -100,7 +100,7 @@ function verify_email(req, res, next) {
             }
     }).catch( (error) => {
         console.log(error);
-        return res.json(APIError.InternalServerError());
+        return APIError.InternalServerError(res);
     });
 }
 
@@ -122,10 +122,10 @@ function login(req, res, next) {
     })
     .then( (user) => {
         if (!user) {
-            return res.json(APIError.NotFound("user tidak ditemukan"));
+            return APIError.NotFound(res, "user tidak ditemukan");
         } else {
             if (user.verify_email[0].is_verify === 0) {
-                return res.json(APIError.BadRequest("email akun belum diverifikasi"));
+                return APIError.BadRequest("email akun belum diverifikasi");
             } else {
                 const usertoken_info = {
                     id: user.id,
@@ -143,7 +143,7 @@ function login(req, res, next) {
                     })
                 ]).then( ([checkedPassword, generatedToken]) => {
                     if (!checkedPassword) {
-                        return res.json(APIError.Unauthorized("password yang diinputkan salah"));
+                        return APIError.Unauthorized(res, "password yang diinputkan salah");
                     } else {
                         const response = {
                             "status": HttpStatus.OK,
@@ -161,7 +161,7 @@ function login(req, res, next) {
                     }
                 }).catch( (error) => {
                     console.log(error);
-                    return res.json(APIError.InternalServerError());
+                    return APIError.InternalServerError(res);
                 });
             }
         }
@@ -179,7 +179,7 @@ function logout(req, res, next) {
         }],
     }).then( (token) => {
         if (token.is_deleted === 1) {
-            return res.json(APIError.BadRequest("token tidak berlaku"));
+            return APIError.BadRequest(res, "token tidak berlaku");
         } else {
             // set token to deleted
             token.update({
@@ -200,7 +200,7 @@ function logout(req, res, next) {
             }
     }).catch( (error) => {
         console.log(error);
-        return res.json(APIError.InternalServerError());
+        return APIError.InternalServerError(res);
     });
 }
 
@@ -211,7 +211,7 @@ function forgot_password(req, res, next) {
         }
     }).then( (user) => {
         if (!user) { 
-            return res.json(APIError.NotFound("user tidak ditemukan"));
+            return APIError.NotFound(res, "user tidak ditemukan");
         } else { 
                 // generate Salt
             const forgot_salt = ForgotPassword.generateSalt();
@@ -230,7 +230,7 @@ function forgot_password(req, res, next) {
         }
     }).catch( (error) => {
         console.log(error);
-        return res.json(APIError.InternalServerError());
+        return APIError.InternalServerError(res);
     });
 }
 
@@ -241,7 +241,7 @@ function change_password_forgot(req, res, next) {
         }
     }).then( (forgotpassword) => {
         if (!forgotpassword) {
-            return res.json(APIError.NotFound("url request tidak ditemukan"));
+            return APIError.NotFound(res, "url request tidak ditemukan");
         } else {
             // get user data
             User.findOne({
@@ -250,7 +250,7 @@ function change_password_forgot(req, res, next) {
                 }
             }).then( (user) => {
                 if (!user) {
-                    return res.json(APIError.NotFound("user tidak ditemukan"));
+                    return APIError.NotFound(res, "user tidak ditemukan");
                 } else {
                     const user_salt = User.generateSalt();
                     
@@ -269,7 +269,7 @@ function change_password_forgot(req, res, next) {
         }
     }).catch( error => {
         console.log(error);
-        return res.json(APIError.InternalServerError());
+        return APIError.InternalServerError(res);
     });
 }
 
@@ -284,10 +284,10 @@ function me(req, res, next) {
         }]
     }).then( (token) => {
         if (!token) {
-            return res.json(APIError.NotFound("token sudah tidak aktif"));
+            return APIError.NotFound(res, "token sudah tidak aktif");
         } else {
             if (!token.user) {
-                return res.json(APIError.NotFound("user tidak ditemukan"));
+                return APIError.NotFound("user tidak ditemukan");
             } else {
                 const response = {
                     "status": HttpStatus.OK,
@@ -304,7 +304,7 @@ function me(req, res, next) {
         }
     }).catch( error => {
         console.log(error);
-        return res.json(APIError.InternalServerError());
+        return APIError.InternalServerError(res);
     });
 }
 

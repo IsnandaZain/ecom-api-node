@@ -9,16 +9,16 @@ const router = express.Router();
 
 router.route('/create')
     /** POST /api/v1/dashboard/product/create - Create new product */
-    .post( (req, res, next) => {
+    .post( (req, res) => {
         const error = paramValidation.create(req);
         if (error) {
             const response = {
                 "status": HttpStatus.BAD_REQUEST,
                 "messages": error.details[0].message,
             }
-            return res.json(response)
+            return res.status(HttpStatus.BAD_REQUEST).json(response)
         } else {
-            productCtrl.create(req, res, next);
+            productCtrl.create(req, res);
         }
     });
 
