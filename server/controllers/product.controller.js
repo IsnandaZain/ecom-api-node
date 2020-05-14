@@ -26,36 +26,29 @@ function create(req, res) {
         price: req.body.price,
         stok: req.body.stok,
     }).then( (product_saved) => {
-        let size = []
-        let color = []
-        let material = []
-
         if (req.body.size) {
-            size = req.body.size.split(":");
-            for (let index in size){
+            for (let index in req.body.size){
                 ProductSize.create({
                     product_id: product_saved.id,
-                    size_:size[index],
+                    size_:req.body.size[index],
                 })
             }
         }
 
         if (req.body.color) {
-            color = req.body.color.split(":");
-            for (let index in color) {
+            for (let index in req.body.color) {
                 ProductColor.create({
                     product_id: product_saved.id,
-                    color: color[index]
+                    color: req.body.color[index]
                 })
             }
         }
 
         if (req.body.material) {
-            material = req.body.material.split(":");
-            for (let index in material) {
+            for (let index in req.body.material) {
                 ProductMaterial.create({
                     product_id: product_saved.id,
-                    material: material[index]
+                    material: req.body.material[index]
                 })
             }
         }
@@ -66,9 +59,9 @@ function create(req, res) {
             "description": product_saved.description,
             "price": product_saved.price,
             "stok": product_saved.stok,
-            "size": size,
-            "color": color,
-            "material": material,
+            "size": req.body.size,
+            "color": req.body.color,
+            "material": req.body.material,
         }
 
         return res.json(response);

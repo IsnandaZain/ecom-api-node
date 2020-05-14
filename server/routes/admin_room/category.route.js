@@ -1,17 +1,15 @@
 import express from 'express';
 import HttpStatus from 'http-status-codes';
-import multer from 'multer';
 
-import paramValidation from '../../validator/product.validation';
-import * as productCtrl from '../../controllers/product.controller';
-import upload from '../../../config/multer_upload';
+import paramValidation from '../../validator/category.validation';
+import * as categoryCtrl from '../../controllers/category.controller';
 import * as auth from '../../helpers/auth';
 
 const router = express.Router();
 
 router.route('/create')
-    /** POST /api/v1/dashboard/product/create - Create new product */
-    .post( upload.fields([{name: 'product_photo', maxCount: 5}]), (req, res) => {
+    /** PSOT /api/v1/dashboard/category/create - Create new category */
+    .post( (req, res) => {
         const authorize = auth.checkPermission(res, "administrator");
         if (!authorize) {
             const error = paramValidation.create(req);
@@ -20,9 +18,9 @@ router.route('/create')
                     "status": HttpStatus.BAD_REQUEST,
                     "messages": error.details[0].message,
                 }
-                return res.status(HttpStatus.BAD_REQUEST).json(response)
+                return res.status(HttpStatus.BAD_REQUEST).json(response);
             } else {
-                productCtrl.create(req, res);
+                categoryCtrl.create(req, res);
             }
         }
     });

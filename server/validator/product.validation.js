@@ -30,12 +30,12 @@ function create (req) {
                 "string.base": "stok harus berupa angka",
                 "string.empty": "stok masih kosong"
             }),
-        size: Joi.string()
+        size: Joi.array().items(Joi.string())
             .optional(),
-        color: Joi.string()
+        color: Joi.array().items(Joi.string())
             .optional(),
-        material: Joi.string()
-            .optional(),
+        material: Joi.array().items(Joi.string())
+            .optional()
     });
 
     const {error} = schema.validate(req.body);
