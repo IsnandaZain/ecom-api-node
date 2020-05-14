@@ -18,10 +18,13 @@ function create(req, res) {
         parent_id: req.body.parent_id ? req.body.parent_id : null,
     }).then( (category_saved) => {
         const response = {
-            "id": category_saved.id,
-            "name": category_saved.name,
-            "parent_id": category_saved.parent_id,
-            "is_deleted": category_saved.is_deleted,
+            "status": HttpStatus.OK,
+            "category": {
+                "id": category_saved.id,
+                "name": category_saved.name,
+                "parent_id": category_saved.parent_id,
+                "is_deleted": category_saved.is_deleted,
+            }
         }
 
         return res.json(response);
@@ -42,10 +45,13 @@ function get(req, res) {
             return APIError.NotFound(res, "category tidak ditemukan");
         } else {
             const response = {
-                "id": category_saved.id,
-                "name": category_saved.name,
-                "parent_id": category_saved.parent_id,
-                "is_deleted": category_saved.is_deleted,
+                "status": HttpStatus.OK,
+                "category": {
+                    "id": category_saved.id,
+                    "name": category_saved.name,
+                    "parent_id": category_saved.parent_id,
+                    "is_deleted": category_saved.is_deleted,
+                }
             }
             return res.json(response);
         }
