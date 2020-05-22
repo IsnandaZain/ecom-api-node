@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Ecommerce API NodeJS for Jamet Project",
   "main": "index.js",
-  "engines": { 
-    "node": "12.16.1", 
-    "npm": "6.14.4" 
+  "engines": {
+    "node": "12.16.1",
+    "npm": "6.14.4"
   },
   "scripts": {
     "clean": "rimraf build && mkdirp build",
@@ -28,14 +28,15 @@
   "author": "Jamet API Team",
   "license": "ISC",
   "dependencies": {
-    "@hapi/joi": "^17.1.1",
-    "@sendgrid/mail": "^7.1.0",
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.6",
     "@babel/helpers": "^7.9.6",
     "@babel/node": "^7.8.7",
+    "@babel/polyfill": "^7.8.7",
     "@babel/preset-env": "^7.9.5",
     "@babel/register": "^7.9.0",
+    "@hapi/joi": "^17.1.1",
+    "@sendgrid/mail": "^7.1.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "bcrypt": "^4.0.1",
