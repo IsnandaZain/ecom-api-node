@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Ecommerce API NodeJS for Jamet Project",
   "main": "index.js",
+  "engine": { 
+    "node": "12.16.2", 
+    "npm": "6.13.4" 
+  },
   "scripts": {
     "clean": "rimraf build && mkdirp build",
     "build-server": "babel -d ./build/server ./server -s",
