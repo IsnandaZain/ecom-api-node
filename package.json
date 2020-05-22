@@ -1,5 +1,5 @@
 {
-  "name": "ecom-api",
+  "name": "jamet-ecom",
   "version": "1.0.0",
   "description": "Ecommerce API NodeJS for Jamet Project",
   "main": "index.js",
