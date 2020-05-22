@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
 import sgMail from '@sendgrid/mail';
 import sendgridTransport from 'nodemailer-sendgrid-transport';
+import "core-js/stable";
+import "regenerator-runtime";
 
 import db from '../../config/sequelize_master';
 
