@@ -4,9 +4,10 @@
   "description": "Ecommerce API NodeJS for Jamet Project",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build && nodemon index.js",
-    "build": "babel-node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf build && mkdirp build",
+    "build-babel": "babel ./build -d ./server --ignore ./node_modules",
+    "build": "npm run clean && npm run build-babel",
+    "start": "npm run build && node ./build/index.js"
   },
   "keywords": [
     "Nodejs",
@@ -19,6 +20,8 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@sendgrid/mail": "^7.1.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^26.0.1",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -28,6 +31,8 @@
     "express-validation": "^3.0.2",
     "fs": "0.0.1-security",
     "graceful-js": "^1.0.0",
+    "gulp": "^4.0.2",
+    "gulp-load-plugins": "^2.0.3",
     "helmet": "^3.22.0",
     "http-status-codes": "^1.4.0",
     "jsonwebtoken": "^8.5.1",
@@ -50,7 +55,8 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.9.0",
+    "@babel/core": "^7.9.6",
+    "@babel/helpers": "^7.9.6",
     "@babel/node": "^7.8.7",
     "@babel/preset-env": "^7.9.5",
     "@babel/register": "^7.9.0",

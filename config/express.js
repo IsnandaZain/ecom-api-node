@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
 import HttpStatus from 'http-status-codes';
+import cors from 'cors';
 
 import routes from '../server/routes/index.route';
 import * as auth from '../server/helpers/auth';
@@ -47,6 +48,8 @@ app.use(bodyParser.raw({
     limit: '100kb',
     type: 'application/json'
 }));
+
+app.use(cors());
 
 // routes khusus file
 app.use('/files', function(req, res) {
