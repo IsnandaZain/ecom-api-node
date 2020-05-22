@@ -7,7 +7,6 @@
     "clean": "rimraf build && mkdirp build",
     "build-server": "babel -d ./build/server ./server -s",
     "build-config": "babel -d ./build/config ./config -s",
-    "build-public": "babel -d ./build/public ./public -s",
     "build-index": "babel -o ./build/index.js ./index.js -s",
     "build-env": "babel -d ./build ./.env --copy-files",
     "build-gitignore": "babel -d ./build ./.gitignore --copy-files",
