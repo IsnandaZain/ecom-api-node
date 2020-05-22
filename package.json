@@ -15,7 +15,7 @@
     "build-env": "babel -d ./build ./.env --copy-files",
     "build-gitignore": "babel -d ./build ./.gitignore --copy-files",
     "build-package": "babel -d ./build ./package.json --copy-files",
-    "build-babel": "npm run build-server && npm run build-config && npm run build-public && npm run build-index && npm run build-env && npm run build-gitignore && npm run build-package",
+    "build-babel": "npm run build-server && npm run build-config && npm run build-index && npm run build-env && npm run build-gitignore && npm run build-package",
     "build": "npm run clean && npm run build-babel",
     "start": "npm run build && node ./build/index.js"
   },
