@@ -35,6 +35,8 @@ function create (req) {
         color: Joi.array().items(Joi.string())
             .optional(),
         material: Joi.array().items(Joi.string())
+            .optional(),
+        category: Joi.array().items(Joi.string())
             .optional()
     });
 

@@ -18,6 +18,8 @@ function search_category(req, res) {
 
     if (req.query.parent_id) {
         filter.push({parent_id: req.query.parent_id})
+    } else {
+        filter.push({parent_id: null})
     }
 
     Category.findAll({
@@ -26,7 +28,7 @@ function search_category(req, res) {
         )
     }).then( (category_saved) => {
         if (!category_saved) {
-            return APIError.NotFound(res, "category tidak ditemukan");
+            return res.json({"status": 200, "category": []});
         } else {
             let result = []
             for (let index in category_saved) {

@@ -11,6 +11,7 @@ const Product = db.Product;
 const ProductSize = db.ProductSize;
 const ProductColor = db.ProductColor;
 const ProductMaterial = db.ProductMaterial;
+const ProductCategory = db.ProductCategory;
 
 /**
  * Create a new product
@@ -52,6 +53,15 @@ function create(req, res) {
                 })
             }
         }
+
+        let category = []
+        for (let index in req.body.category) {
+            category.push(JSON.parse(req.body.category[index]))
+            ProductCategory.create({
+                product_id: product_saved.id,
+                category_id: JSON.parse(req.body.category[index]).id,
+            })
+        } 
         
         const response = {
             "id": product_saved.id,
@@ -62,6 +72,7 @@ function create(req, res) {
             "size": req.body.size,
             "color": req.body.color,
             "material": req.body.material,
+            "category": category,
         }
 
         return res.json(response);
